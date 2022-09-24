@@ -251,6 +251,10 @@ generate_bigm(char *str, int slen)
 				bytelen;
 	char	   *bword,
 			   *eword;
+    char        c;
+    int         tmpbytelen;
+    char       *tmp;
+    char       *tmpend;
 
 	/*
 	 * Guard against possible overflow in the palloc requests below.
@@ -284,6 +288,23 @@ generate_bigm(char *str, int slen)
 	{
 		bytelen = eword - bword;
 		memcpy(buf + LPADDING, bword, bytelen);
+
+        /*
+		 * tolower always.
+		 */
+        tmp = buf + LPADDING;
+        tmpend = tmp + bytelen;
+        while(tmp < tmpend) {
+            tmpbytelen = pg_mblen(tmp);
+            if(tmpbytelen == 1) {
+                c = *tmp;
+                if(c <= 'Z' && c >= 'A') {
+                    c = c - 'A' + 'a';
+                    *tmp = c;
+                }
+            }
+            tmp += tmpbytelen;
+        }
 
 		buf[LPADDING + bytelen] = ' ';
 		buf[LPADDING + bytelen + 1] = ' ';
